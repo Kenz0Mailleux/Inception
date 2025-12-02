@@ -1,0 +1,167 @@
+%PDF-1.4
+%âãÏÓ
+1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj
+2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj
+3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>endobj
+4 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj
+5 0 obj<< /Length 4623 >>stream
+BT /F1 11 Tf 50 770 Td
+(Réponses détaillées au barème Inception \(FR\)) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Préliminaires) Tj
+0 -16 Td
+(- Présence: évaluer étudiant sur sa machine; pas de triche constatee.) Tj
+0 -16 Td
+(- Repo: Makefile et dossier srcs a la racine, pas d'alias suspects.) Tj
+0 -16 Td
+(- Commande de nettoyage initial conseillee fournie dans sujet \(docker) Tj
+0 -16 Td
+(stop/rm/rmi/volume/network\).) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Structure generale) Tj
+0 -16 Td
+(- Dossier srcs contient docker-compose.yml, .env, requirements/{nginx,wordpress,mariadb},) Tj
+0 -16 Td
+(volumes/ pour bind mounts.) Tj
+0 -16 Td
+(- Makefile a la racine pilote docker compose avec srcs/.env.) Tj
+0 -16 Td
+(- Aucun network: host, aucun links dans docker-compose.yml; un reseau nomme inception est) Tj
+0 -16 Td
+(declare.) Tj
+0 -16 Td
+(- Entrypoints/scripts sans boucle infinie ni tail -f; CMD/ENTRYPOINT lancent les services au) Tj
+0 -16 Td
+(premier plan.) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Docker / Images / Build) Tj
+0 -16 Td
+(- Trois services: nginx, wordpress \(php-fpm\), mariadb; chacun a son Dockerfile dedie base sur) Tj
+0 -16 Td
+(alpine:3.19 \(pas d'image prefaites\).) Tj
+0 -16 Td
+(- Images locales nommees comme les services \(nginx_kmailleu, wordpress_kmailleu,) Tj
+0 -16 Td
+(mariadb_kmailleu\) construites via docker-compose.) Tj
+0 -16 Td
+(- Makefile cibles: up/build/down/restart/logs/clean/fclean; up construit et lance via docker) Tj
+0 -16 Td
+(compose.) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Reseau) Tj
+0 -16 Td
+(- docker-compose cree le reseau bridge 'inception'; verifiable avec docker network ls.) Tj
+0 -16 Td
+(- Pas de liens explicites; resolution par service name via DNS interne \(mariadb,) Tj
+0 -16 Td
+(wordpress_kmailleu, etc.\).) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(NGINX \(SSL/TLS\)) Tj
+0 -16 Td
+(- Dockerfile leger \(nginx + openssl + entrypoint\).) Tj
+0 -16 Td
+(- Port publie: 443 uniquement; port 80 redirige 301 dans default.conf mais non publie sur) Tj
+0 -16 Td
+(l'hote.) Tj
+0 -16 Td
+(- Certificat self-signed genere au demarrage \(/etc/nginx/ssl/server.crt/key\) valable 365j,) Tj
+0 -16 Td
+(TLS v1.2/v1.3 supporte par defaut nginx alpine.) Tj
+0 -16 Td
+(- Acces attendu: https://kmailleu.42.fr \(ou login.42.fr avec login du projet\) renvoie le site) Tj
+0 -16 Td
+(WP; HTTP non accessible depuis l'exterieur.) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(WordPress \(php-fpm + volume\)) Tj
+0 -16 Td
+(- Dockerfile PHP-FPM 8.2 avec extensions requises; aucune trace de nginx.) Tj
+0 -16 Td
+(- Entrypoint setup.sh: attend MariaDB, assure droits sur /var/www/html, telecharge WP \(wp-cli) Tj
+0 -16 Td
+(ou fallback tar.gz\), genere wp-config.php, installe le site, cree user editeur.) Tj
+0 -16 Td
+(- Volume bind: /home/kenzo/data/wordpress monte sur /var/www/html \(driver local bind\).) Tj
+0 -16 Td
+(- Admin: WP_ADMIN_USER=siteowner \(non 'admin'\), mot de passe selon .env; user secondaire:) Tj
+0 -16 Td
+(editor.) Tj
+0 -16 Td
+(- Verifications attendues: page d'install absente, connexion admin/editeur OK, ajout) Tj
+0 -16 Td
+(commentaire et edition de page refletee sur le front.) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(MariaDB \(volume\)) Tj
+0 -16 Td
+(- Dockerfile mariadb-server/client; init_db.sh gere init et users.) Tj
+0 -16 Td
+(- Volume bind: /home/kenzo/data/mariadb monte sur /var/lib/mysql \(driver local bind\).) Tj
+0 -16 Td
+(- Comptes: root \(mdp MYSQL_ROOT_PASSWORD\), utilisateur MYSQL_USER avec base MYSQL_DATABASE;) Tj
+0 -16 Td
+(root sans mot de passe refuse \(skip-name-resolve actif\).) Tj
+0 -16 Td
+(- Connexion: mysql -hmariadb -u${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}; base non) Tj
+0 -16 Td
+(vide apres install WP.) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Persistance) Tj
+0 -16 Td
+(- Donnees persistees via bind mounts dans /home/kenzo/data/{mariadb,wordpress}; apres reboot et) Tj
+0 -16 Td
+(relance docker compose, site et DB restent configures.) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Commandes utiles \(defense\)) Tj
+0 -16 Td
+(- Lancer: make up \(ou docker compose -f srcs/docker-compose.yml --env-file srcs/.env up -d) Tj
+0 -16 Td
+(--build\).) Tj
+0 -16 Td
+(- Logs: docker compose -f srcs/docker-compose.yml --env-file srcs/.env logs -f.) Tj
+0 -16 Td
+(- Verifier volumes: docker volume ls && docker volume inspect) Tj
+0 -16 Td
+(mariadb_data_kmailleu/wordpress_data_kmailleu \(device=/home/kenzo/data/...\).) Tj
+0 -16 Td
+(- Verifier reseau: docker network ls | grep inception.) Tj
+0 -16 Td
+(- Tests DB: mysql -hmariadb -uroot -p${MYSQL_ROOT_PASSWORD} \(reussi\) / sans mdp \(echoue) Tj
+0 -16 Td
+(attendu\).) Tj
+0 -16 Td
+() Tj
+0 -16 Td
+(Bonus) Tj
+0 -16 Td
+(- Aucun service bonus ajoute dans ce depot; barreme bonus a ignorer si mandatory pas valide.) Tj
+ET
+endstream endobj
+xref
+0 6
+0000000000 65535 f 
+0000000015 00000 n 
+0000000062 00000 n 
+0000000117 00000 n 
+0000000241 00000 n 
+0000000309 00000 n 
+trailer<< /Size 6 /Root 1 0 R >>
+startxref
+4982
+%%EOF

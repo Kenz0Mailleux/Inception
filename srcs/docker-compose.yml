@@ -1,0 +1,78 @@
+name: inception_kmailleu
+
+services:
+  mariadb:
+    build:
+      context: ./requirements/mariadb
+    container_name: mariadb_kmailleu
+    image: mariadb
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - mariadb_data_kmailleu:/var/lib/mysql
+    networks:
+      - inception
+    expose:
+      - "3306"
+   # remplace provisoirement par une vérif socket locale
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -S /run/mysqld/mysqld.sock --silent"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+
+
+
+  wordpress:
+    build:
+      context: ./requirements/wordpress
+    container_name: wordpress_kmailleu
+    image: wordpress
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    volumes:
+      - wordpress_data_kmailleu:/var/www/html
+    networks:
+      - inception
+    expose:
+      - "9000"
+
+  nginx:
+    build:
+      context: ./requirements/nginx
+    container_name: nginx_kmailleu
+    image: nginx
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress_data_kmailleu:/var/www/html:ro
+    networks:
+      - inception
+
+networks:
+  inception:
+    name: inception
+
+volumes:
+  mariadb_data_kmailleu:
+    name: mariadb_data_kmailleu
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOST_DB}
+  wordpress_data_kmailleu:
+    name: wordpress_data_kmailleu
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${HOST_WP}
