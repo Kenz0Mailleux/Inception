@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+mkdir -p "${HOST_DB}"
+
 # Permissions sûres à chaque boot
 chown -R mysql:mysql /var/lib/mysql
 

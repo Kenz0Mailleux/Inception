@@ -7,6 +7,7 @@ RUN apk add --no-cache \
     curl bash mariadb-client
 
 # Dossier WP
+mkdir -p /home/kmailleu/data/wordpress
 RUN mkdir -p /var/www/html && chown -R nobody:nogroup /var/www/html
 
 # PHP-FPM config minimale

@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+mkdir -p "${HOST_WP}
+
 # Attendre MariaDB
 echo "⏳ Attente de MariaDB (${MYSQL_HOST:-mariadb}:3306)…"
 until mysql -h"${MYSQL_HOST:-mariadb}" -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}" -e "SELECT 1" >/dev/null 2>&1; do
