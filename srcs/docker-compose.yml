@@ -16,7 +16,7 @@ services:
       - "3306"
    # remplace provisoirement par une vérif socket locale
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -S /run/mysqld/mysqld.sock --silent"]
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -p${MYSQL_ROOT_PASSWORD} -S /run/mysqld/mysqld.sock --silent"]
       interval: 5s
       timeout: 3s
       retries: 30
