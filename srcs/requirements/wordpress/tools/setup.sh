@@ -1,7 +1,8 @@
 #!/bin/bash
 set -e
 
-mkdir -p "${HOST_WP}
+# Assure le dossier de volume côté host si variable fournie
+[ -n "${HOST_WP}" ] && mkdir -p "${HOST_WP}"
 
 # Attendre MariaDB
 echo "⏳ Attente de MariaDB (${MYSQL_HOST:-mariadb}:3306)…"
