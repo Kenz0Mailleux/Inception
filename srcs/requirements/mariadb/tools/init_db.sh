@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-# 0) Permissions sûres à chaque boot
+# Permissions sûres à chaque boot
 chown -R mysql:mysql /var/lib/mysql
 
 if [ ! -d "/var/lib/mysql/mysql" ]; then
   echo "🔧 Initialisation MariaDB…"
   mariadb-install-db --user=mysql --ldata=/var/lib/mysql > /dev/null
 
-  # 1) Bootstrap: root en mot de passe "classique", DB + users (+ variantes host)
+  # Bootstrap: root en mot de passe "classique", DB + users (+ variantes host)
   mysqld --user=mysql --bootstrap <<-EOSQL
     FLUSH PRIVILEGES;
     ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('${MYSQL_ROOT_PASSWORD}');
